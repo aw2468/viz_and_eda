@@ -1,0 +1,170 @@
+---
+title: "vis_1"
+author: "Anni Wang"
+date: "2024-09-26"
+output: github_document
+---
+
+```{r}
+library(tidyverse)
+library(ggridges)
+```
+
+```{r}
+weather_df = 
+  rnoaa::meteo_pull_monitors(
+    c("USW00094728", "USW00022534", "USS0023B17S"),
+    var = c("PRCP", "TMIN", "TMAX"), 
+    date_min = "2021-01-01",
+    date_max = "2022-12-31") |>
+  mutate(
+    name = case_match(
+      id, 
+      "USW00094728" ~ "CentralPark_NY", 
+      "USW00022534" ~ "Molokai_HI",
+      "USS0023B17S" ~ "Waterhole_WA"),
+    tmin = tmin / 10,
+    tmax = tmax / 10) |>
+  select(name, id, everything())
+```
+
+
+```{r}
+weather_df
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
+```{r}
+ggplot(weather_df, aes(x = tmin, y = tmax))
+```
+
+```{r}
+ggplot(weather_df, aes(x = tmin, y = tmax)) + 
+  geom_point()
+```
+
+```{r}
+gg_weather_scatterplot=
+weather_df |>
+ggplot(aes(x = tmin, y = tmax)) + 
+  geom_point()
+
+gg_weather_scatterplot
+```
+
+```{r}
+weather_df |>
+  ggplot(aes(x = tmin, y = tmax)) + 
+    geom_point(aes(color=name),alpha=.3, size=.8)+
+  geom_smooth(se=FALSE)
+```
+
+```{r}
+weather_df |>
+  ggplot(aes(x = tmin, y = tmax, color=name)) + 
+  geom_point(alpha=.3)+
+  geom_smooth(se=FALSE)+
+  facet_grid(.~name)
+```
+
+interesting scatterplot
+```{R}
+weather_df |>
+  ggplot(aes(x = date, y = tmax, colour = name)) + 
+  geom_point()+
+  geom_smooth(se=FALSE)+
+  facet_grid(.~name)
+```
+
+```{R}
+weather_df |> 
+  filter(name == "CentralPark_NY") |> 
+  mutate(
+    tmax_fahr = tmax * (9 / 5) + 32,
+    tmin_fahr = tmin * (9 / 5) + 32) |> 
+  ggplot(aes(x = tmin_fahr, y = tmax_fahr)) +
+  geom_point(alpha = .5) + 
+  geom_smooth(method = "lm", se = FALSE)
+
+```
+
+```{R}
+weather_df |>
+  ggplot(aes(x = tmin, y = tmax))+
+  geom_hex()
+```
+
+```{r}
+weather_df |>
+  ggplot(aes(x = tmin, y = tmax))+
+  geom_point(color="blue")
+```
+
+```{r}
+weather_df |>
+  ggplot(aes(x = tmin, fill=name))+
+  geom_histogram(position = "dodge")
+```
+
+fix
+
+```{r}
+weather_df|>
+  ggplot(aes(x=tmin, fill=name))+
+   geom_histogram()+
+  facet_grid(.~name)
+```
+
+density plot
+```{r}
+weather_df |>
+  ggplot(aes(x = tmin, fill=name))+
+  geom_density(alpha=.3)
+```
+```{r}
+ggplot(weather_df, aes(x = name, y = tmax, fill=name)) + 
+  geom_boxplot()
+```
+```{r}
+weather_df|>
+  ggplot(aes(x=name, y=tmin, fill=name))+
+  geom_violin()
+```
+```{r}
+ggplot(weather_df, aes(x = tmax, y = name)) + 
+  geom_density_ridges(scale = .85)
+```
+
+```{r}
+ggplot(weather_df, aes(x = prcp)) + 
+  geom_density(aes(fill = name), alpha = .5) 
+ggplot(weather_df, aes(x = prcp, y = name)) + 
+  geom_density_ridges(scale = .85)
+ggplot(weather_df, aes(y = prcp, x = name)) + 
+  geom_boxplot() 
+weather_df |> 
+  filter(prcp > 0) |> 
+  ggplot(aes(x = prcp, y = name)) + 
+  geom_density_ridges(scale = .85)
+```
+
+```{r}
+ggp_weather = 
+  ggplot(weather_df, aes(x = tmin, y = tmax)) + 
+  geom_point(aes(color = name), alpha = .5) 
+
+ggsave("ggp_weather.pdf", ggp_weather, width = 8, height = 5)
+```
+
+```{r}
+knitr::opts_chunk$set(
+  fig.width = 6,
+  fig.asp = .6,
+  out.width = "90%"
+)
+```
+```{r}
+ggplot(weather_df, aes(x = tmin, y = tmax)) + 
+  geom_point(aes(color = name))
+```
